@@ -89,104 +89,6 @@ class State(object):
         return [(Point(h, v), self.board[(h, v)])
                 for h in range(self.size)
                 for v in range(self.size)]
-
-    def _winning_move(self,symbol):
-        for i in range(ord('a'),ord('c')+1):
-            for j in range(ord('1'),ord('3')+1):
-                point = Point.from_ag(chr(i)+chr(j))
-                temp_board = self.copy()
-                if temp_board.is_available(point):
-                    temp_board.place(point,symbol)
-                    if symbol == Symbol.X and temp_board.all_in_a_rowX():
-                        return point
-                    elif symbol == Symbol.O and temp_board.all_in_a_row():
-                        return point
-                
-                    temp_board = self.copy()
-        return None
-
-    def _block_losing_move(self,symbol):
-        opSymbol = Symbol.X
-        if opSymbol == symbol:
-            opSymbol = Symbol.O
-        return self._winning_move(opSymbol)
-
-    def _opposite_corner(self,symbol):
-#point.horizontal,point.vertical
-        punct1 = Point.from_ag('a1')
-        punct2 = Point.from_ag('c3')
-        if self.board[punct1] == symbol and self.board[punct2] == Symbol.EMPTY:
-            return punct2
-        elif self.board[punct1] == Symbol.EMPTY and self.board[punct2] == symbol:
-            return punct1
-
-        punct1 = Point.from_ag('a3')
-        punct2 = Point.from_ag('c1')
-        if self.board[punct1] == symbol and self.board[punct2] == Symbol.EMPTY:
-            return punct2
-        elif self.board[punct1] == Symbol.EMPTY and self.board[punct2] == symbol:
-            return punct1
-
-        return None
-
-    def _corner(self):
-        for i in ['a','c']:
-            for j in ['1','3']:
-                punct = Point.from_ag(i+j)
-                if self.is_available(punct) == True:
-                    return punct
-        return None
-
-    def _sides(self):
-        punct = Point.from_ag('a2')
-        if self.is_available(punct):
-            return punct
-        punct = Point.from_ag('b1')
-        if self.is_available(punct):
-           return punct
-        punct = Point.from_ag('b3')
-        if self.is_available(punct):
-            return punct
-        punct = Point.from_ag('c2')
-        if self.is_available(punct):
-            return punct
-        return None
-
-    def _center(self):
-        punct = Point.from_ag('b2')
-        if self.is_available(punct) == True:
-            return punct
-        return None
-    def _AImove_X(self,symbol):
-        if self._winning_move(symbol) != None:
-            return self._winning_move(symbol)
-        if self._block_losing_move(symbol) != None:
-            return self._block_losing_move(symbol)
-        if self._opposite_corner(symbol) != None:
-            return self._opposite_corner(symbol)
-        if self._corner() != None:
-            return self._corner()
-        if self._center() != None:
-            return self._center()
-        if self._sides() != None:
-            return self._sides()
-    def _AImove_O(self,symbol):
-        if self._winning_move(symbol) != None:
-            return self._winning_move(symbol)
-        if self._block_losing_move(symbol) != None:
-            return self._block_losing_move(symbol)
-        if self._opposite_corner(symbol) != None:
-            return self._opposite_corner(symbol)
-        if self._center() != None:
-            return self._center()
-        if self._corner() != None:
-            return self._corner()
-        if self._sides() != None:
-            return self._sides()
-    def AImove(self,symbol):
-        if symbol == Symbol.O:
-            return self._AImove_O(symbol)
-        return self._AImove_X(symbol)
 		
 class Presentation(object):
     def __init__(self, mode='text'):
@@ -225,6 +127,103 @@ class TicTacToeAI:
         return point
     def smart_choose(self,state,symbol):
         return state.AImove(symbol)
+class TicTacToeSmartAI():
+    def _AImove_X(self,symbol,state):
+        if self._winning_move(symbol,state) != None:
+            return self._winning_move(symbol,state)
+        if self._block_losing_move(symbol,state) != None:
+            return self._block_losing_move(symbol,state)
+        if self._opposite_corner(symbol,state) != None:
+            return self._opposite_corner(symbol,state)
+        if self._corner(state) != None:
+            return self._corner(state)
+        if self._center(state) != None:
+            return self._center(state)
+        if self._sides(state) != None:
+            return self._sides(state)
+    def _AImove_O(self,symbol,state):
+        if self._winning_move(symbol,state) != None:
+            return self._winning_move(symbol,state)
+        if self._block_losing_move(symbol,state) != None:
+            return self._block_losing_move(symbol,state)
+        if self._opposite_corner(symbol,state) != None:
+            return self._opposite_corner(symbol,state)
+        if self._center(state) != None:
+            return self._center(state)
+        if self._corner(state) != None:
+            return self._corner(state)
+        if self._sides(state) != None:
+            return self._sides(state)
+    def choose(self,symbol,state):
+        if symbol == Symbol.O:
+            return self._AImove_O(symbol,state)
+        return self._AImove_X(symbol,state)
+    def _winning_move(self,symbol,state):
+        for i in range(ord('a'),ord('c')+1):
+            for j in range(ord('1'),ord('3')+1):
+                point = Point.from_ag(chr(i)+chr(j))
+                temp_board = state.copy()
+                if temp_board.is_available(point):
+                    temp_board.place(point,symbol)
+                    if symbol == Symbol.X and temp_board.all_in_a_rowX():
+                        return point
+                    elif symbol == Symbol.O and temp_board.all_in_a_row():
+                        return point
+                
+                    temp_board = state.copy()
+        return None
+
+    def _block_losing_move(self,symbol,state):
+        opSymbol = Symbol.X
+        if opSymbol == symbol:
+            opSymbol = Symbol.O
+        return self._winning_move(opSymbol,state)
+
+    def _opposite_corner(self,symbol,state):
+        punct1 = Point.from_ag('a1')
+        punct2 = Point.from_ag('c3')
+        if state.board[punct1] == symbol and state.board[punct2] == Symbol.EMPTY:
+            return punct2
+        elif state.board[punct1] == Symbol.EMPTY and state.board[punct2] == symbol:
+            return punct1
+
+        punct1 = Point.from_ag('a3')
+        punct2 = Point.from_ag('c1')
+        if state.board[punct1] == symbol and state.board[punct2] == Symbol.EMPTY:
+            return punct2
+        elif state.board[punct1] == Symbol.EMPTY and state.board[punct2] == symbol:
+            return punct1
+
+        return None
+
+    def _corner(self,state):
+        for i in ['a','c']:
+            for j in ['1','3']:
+                punct = Point.from_ag(i+j)
+                if state.is_available(punct) == True:
+                    return punct
+        return None
+
+    def _sides(self,state):
+        punct = Point.from_ag('a2')
+        if state.is_available(punct):
+            return punct
+        punct = Point.from_ag('b1')
+        if state.is_available(punct):
+           return punct
+        punct = Point.from_ag('b3')
+        if state.is_available(punct):
+            return punct
+        punct = Point.from_ag('c2')
+        if state.is_available(punct):
+            return punct
+        return None
+
+    def _center(self,state):
+        punct = Point.from_ag('b2')
+        if state.is_available(punct) == True:
+            return punct
+        return None
 class Game(object):
     def __init__(self):
         self.state = State()
@@ -261,14 +260,14 @@ class Game(object):
         aiSymbol = Symbol.X
         if self.symbol == aiSymbol:
             aiSymbol = Symbol.O
-        self.state.place(TicTacToeAI().smart_choose(self.state,aiSymbol), aiSymbol)
+        self.state.place(TicTacToeSmartAI().choose(aiSymbol,self.state), aiSymbol)
         self.presentation.draw(self.state)
         for point in self.moves():
             self.state.place(point, self.symbol)
             self.presentation.draw(self.state)
             if self.done():
                 break
-            self.state.place(TicTacToeAI().smart_choose(self.state,aiSymbol), aiSymbol)
+            self.state.place(TicTacToeSmartAI().choose(aiSymbol,self.state), aiSymbol)
             self.presentation.draw(self.state)
             if self.done():
                 break
@@ -280,9 +279,9 @@ class Game(object):
         for point in self.moves():
             self.state.place(point, self.symbol)
             self.presentation.draw(self.state)
-            if self.done():
+            if self.done():	
                 break
-            self.state.place(TicTacToeAI().smart_choose(self.state,aiSymbol), aiSymbol)
+            self.state.place(TicTacToeSmartAI().choose(aiSymbol,self.state), aiSymbol)
             self.presentation.draw(self.state)
             if self.done():
                 break
