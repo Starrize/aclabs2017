@@ -1,0 +1,2 @@
+__iter__ === iterator - returneaza un obiect care are implementata metoda __next__ 
+__next__ === returneaza valoare urmatoare 
